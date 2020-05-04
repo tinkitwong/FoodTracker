@@ -98,6 +98,13 @@ class MealTableViewController: UITableViewController {
     }
     */
     
+    //MARK: Actions
+    @IBAction func unwindToMealList(sender: UIStoryboardSegue) {
+        if let sourceViewController = sender.source as? MealViewController, let meal = sourceViewController.meal {
+        }
+    }
+
+    
     //MARK: Private Methods
      
     private func loadSampleMeals() {
