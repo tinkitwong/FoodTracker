@@ -29,6 +29,17 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
         // Handle the text field’s user input through delegate callbacks.
         // self refers to the ViewController class
         nameTextField.delegate = self
+        
+        // Set up views if editing an existing Meal.
+        if let meal = meal {
+            navigationItem.title = meal.name
+            nameTextField.text   = meal.name
+            photoImageView.image = meal.photo
+            ratingControl.rating = meal.rating
+        }
+        
+        // Enable the Save button only if the text field has a valid Meal name.
+        updateSaveButtonState()
 
     }
     
@@ -39,8 +50,14 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
         return true
     }
     
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        // Disable the Save button while editing.
+        saveButton.isEnabled = false
+    }
+    
     func textFieldDidEndEditing(_ textField: UITextField) {
-        
+        updateSaveButtonState()
+        navigationItem.title = textField.text
     }
     
     //MARK: UIImagePickerControllerDelegate
@@ -61,6 +78,22 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
     }
     
     //MARK: Navigation
+    @IBAction func cancel(_ sender: UIBarButtonItem) {
+        // Depending on style of presentation (modal or push presentation), this view controller needs to be dismissed in two different ways.
+        let isPresentingInAddMealMode = presentingViewController is UINavigationController
+        
+        if isPresentingInAddMealMode {
+            dismiss(animated: true, completion: nil)
+        }
+        else if let owningNavigationController = navigationController{
+            owningNavigationController.popViewController(animated: true)
+        }
+        else {
+            fatalError("The MealViewController is not inside a navigation controller.")
+        }
+    }
+    
+    
     // This method lets you configure a view controller before it's presented.
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         super.prepare(for: segue, sender: sender)
@@ -88,7 +121,13 @@ class MealViewController: UIViewController, UITextFieldDelegate, UIImagePickerCo
         // Make sure ViewController is notified when the user picks an image.
         imagePickerController.delegate = self
         present(imagePickerController, animated: true, completion: nil)
-
+    }
+    
+    //MARK: Private Methods
+    private func updateSaveButtonState() {
+        // Disable the Save button if the text field is empty.
+        let text = nameTextField.text ?? ""
+        saveButton.isEnabled = !text.isEmpty
     }
 }
 
